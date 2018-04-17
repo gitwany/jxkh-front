@@ -1,5 +1,5 @@
 import { param2Obj } from 'utils';
-
+/*
 const userMap = {
   admin: {
     role: ['admin'],
@@ -39,3 +39,4 @@ export default {
   },
   logout: () => 'success'
 };
+*/

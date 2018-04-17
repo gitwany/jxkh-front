@@ -1,12 +1,12 @@
 import fetch from 'utils/fetch';
 
-export function loginByEmail(username, password) {
+export function loginByEmail(usercode, password) {
   const data = {
-    username,
+    usercode,
     password
   };
   return fetch({
-    url: '/api/auth/jwt/token',
+    url: '/jwt/token',
     method: 'post',
     data
   });
@@ -14,7 +14,7 @@ export function loginByEmail(username, password) {
 
 export function logout(token) {
   return fetch({
-    url: '/api/auth/jwt/invalid',
+    url: '/jwt/invalid',
     method: 'post',
     params: { token }
   });

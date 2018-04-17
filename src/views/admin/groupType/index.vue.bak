@@ -260,7 +260,7 @@ export default {
     resetTemp() {
       this.form = {
         usercode: undefined,
-        username: undefined,
+        name: undefined,
         sex: '男',
         password: undefined,
         description: undefined

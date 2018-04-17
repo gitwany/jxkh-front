@@ -1,7 +1,7 @@
 <template>
 <div class="app-container calendar-list-container">
   <div class="filter-container">
-    <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="姓名或账户" v-model="listQuery.name"> </el-input>
+    <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="姓名或账户" v-model="listQuery.username"> </el-input>
     <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
     <el-button class="filter-item"  v-if="userManager_btn_add"  style="margin-left: 10px;" @click="handleCreate" type="primary" icon="edit">添加</el-button>
   </div>
@@ -10,10 +10,10 @@
           <span>{{scope.row.id}}</span>
         </template> </el-table-column>
     <el-table-column width="200" align="center" label="姓名"> <template scope="scope">
-        <span>{{scope.row.name}}</span>
+        <span>{{scope.row.username}}</span>
       </template> </el-table-column>
     <el-table-column width="110" align="center" label="账户"> <template scope="scope">
-            <span>{{scope.row.username}}</span>
+            <span>{{scope.row.usercode}}</span>
           </template> </el-table-column>
     <el-table-column width="110" align="center" label="性别"> <template scope="scope">
             <span>{{scope.row.sex}}</span>
@@ -39,12 +39,12 @@
   </div>
   <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
     <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-      <el-form-item label="姓名" prop="name">
-        <el-input v-model="form.name" placeholder="请输入姓名"></el-input>
+      <el-form-item label="姓名" prop="username">
+        <el-input v-model="form.username" placeholder="请输入姓名"></el-input>
       </el-form-item>
-      <el-form-item label="账户" prop="username">
-        <el-input v-if="dialogStatus == 'create'" v-model="form.username" placeholder="请输入账户"></el-input>
-        <el-input v-else v-model="form.username" placeholder="请输入账户" readonly></el-input>
+      <el-form-item label="账户" prop="usercode">
+        <el-input v-if="dialogStatus == 'create'" v-model="form.usercode" placeholder="请输入账户"></el-input>
+        <el-input v-else v-model="form.usercode" placeholder="请输入账户" readonly></el-input>
       </el-form-item>
       <el-form-item v-if="dialogStatus == 'create'" label="密码" placeholder="请输入密码" prop="password">
         <el-input type="password" v-model="form.password"></el-input>
@@ -81,14 +81,14 @@ export default {
   data() {
     return {
       form: {
+        usercode: undefined,
         username: undefined,
-        name: undefined,
         sex: '男',
         password: undefined,
         description: undefined
       },
       rules: {
-        name: [
+        username: [
           {
             required: true,
             message: '请输入用户',
@@ -101,7 +101,7 @@ export default {
             trigger: 'blur'
           }
         ],
-        username: [
+        usercode: [
           {
             required: true,
             message: '请输入账户',
@@ -134,7 +134,7 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        name: undefined
+        username: undefined
       },
       sexOptions: ['男', '女'],
       dialogFormVisible: false,
@@ -261,8 +261,8 @@ export default {
     },
     resetTemp() {
       this.form = {
+        usercode: undefined,
         username: undefined,
-        name: undefined,
         sex: '男',
         password: undefined,
         description: undefined

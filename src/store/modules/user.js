@@ -16,14 +16,16 @@ const user = {
   state: {
     user: '',
     status: '',
-    code: '',
+    usercode: '',
     token: getToken(),
-    name: '',
+    username: '',
+    deptcode: '',
+    deptname: '',
     avatar: '',
     introduction: '',
     roles: [],
     menus: undefined,
-    eleemnts: undefined,
+    elements: undefined,
     permissionMenus: undefined,
     setting: {
       articlePlatform: []
@@ -31,8 +33,8 @@ const user = {
   },
 
   mutations: {
-    SET_CODE: (state, code) => {
-      state.code = code;
+    SET_USERCODE: (state, usercode) => {
+      state.usercode = usercode;
     },
     SET_TOKEN: (state, token) => {
       state.token = token;
@@ -46,8 +48,14 @@ const user = {
     SET_STATUS: (state, status) => {
       state.status = status;
     },
-    SET_NAME: (state, name) => {
-      state.name = name;
+    SET_USERNAME: (state, username) => {
+      state.username = username;
+    },
+    SET_DEPTCODE: (state, deptcode) => {
+      state.deptcode = deptcode;
+    },
+    SET_DEPTNAME: (state, deptname) => {
+      state.deptname = deptname;
     },
     SET_AVATAR: (state, avatar) => {
       state.avatar = avatar;
@@ -77,15 +85,15 @@ const user = {
     LoginByEmail({
       commit
     }, userInfo) {
-      const username = userInfo.username.trim();
+      const usercode = userInfo.usercode.trim();
       commit('SET_TOKEN', '');
       commit('SET_ROLES', []);
       commit('SET_MENUS', undefined);
       commit('SET_ELEMENTS', undefined);
       removeToken();
       return new Promise((resolve, reject) => {
-        loginByEmail(username, userInfo.password).then(response => {
-          const data = response;
+        loginByEmail(usercode, userInfo.password).then(response => {
+          const data = response.data;
           if (data.token === '') {
             Message({
               message: '账户或密码错误！',
@@ -110,9 +118,11 @@ const user = {
     }) {
       return new Promise((resolve, reject) => {
         getInfo(state.token).then(response => {
-          const data = response;
+          const data = response.data;
           commit('SET_ROLES', 'admin');
-          commit('SET_NAME', data.name);
+          commit('SET_USERNAME', data.username);
+          commit('SET_DEPTCODE', data.deptcode);
+          commit('SET_DEPTNAME', data.deptname);
           commit('SET_AVATAR', 'http://git.oschina.net/uploads/42/547642_geek_qi.png?1499487420');
           commit('SET_INTRODUCTION', data.description);
           const menus = {};
@@ -141,7 +151,7 @@ const user = {
       state
     }, code) {
       return new Promise((resolve, reject) => {
-        commit('SET_CODE', code);
+        commit('SET_USERCODE', code);
         loginByThirdparty(state.status, state.email, state.code).then(response => {
           commit('SET_TOKEN', response.data.token);
           setToken(response.data.token);

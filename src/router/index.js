@@ -104,8 +104,14 @@ export const asyncRouterMap = [{
     component: _import('admin/gateLog/index'),
     name: '操作日志管理',
     authority: 'gateLogManager'
+  }, {
+    path: 'issueManager',
+    icon: 'viewlist',
+    component: _import('admin/issue/index'),
+    name: '问题管理',
+    authority: 'issueManager'
   }]
-},
+}/* ,
 {
   path: '/authManager',
   component: Layout,
@@ -141,4 +147,4 @@ export const asyncRouterMap = [{
     name: '服务状态监控',
     authority: 'serviceZipkinManager'
   }]
-}];
+}*/];

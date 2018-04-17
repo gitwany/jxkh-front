@@ -44,8 +44,8 @@ router.beforeEach((to, from, next) => {
       if (store.getters.menus === undefined) { // 判断当前用户是否已拉取完user_info信息
         store.dispatch('GetInfo').then(info => { // 拉取user_info
           const menus = {};
-          for (let i = 0; i < info.menus.length; i++) {
-            menus[info.menus[i].code] = true;
+          for (let i = 0; i < info.data.menus.length; i++) {
+            menus[info.data.menus[i].code] = true;
           }
           store.dispatch('GenerateRoutes', menus).then(() => { // 生成可访问的路由表
             router.addRoutes(store.getters.addRouters) // 动态添加可访问路由表

@@ -2,9 +2,9 @@
 <div class="login-container">
   <el-form autoComplete="on" :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left" label-width="0px" class="card-box login-form">
     <h3 class="title">系统登录</h3>
-    <el-form-item prop="username">
+    <el-form-item prop="usercode">
       <span class="svg-container"><icon-svg icon-class="jiedianyoujian"></icon-svg></span>
-      <el-input name="username" type="text" v-model="loginForm.username" autoComplete="on" placeholder="账户"></el-input>
+      <el-input name="usercode" type="text" v-model="loginForm.usercode" autoComplete="on" placeholder="账户"></el-input>
     </el-form-item>
     <el-form-item prop="password">
       <span class="svg-container"><icon-svg icon-class="mima"></icon-svg></span>
@@ -43,11 +43,11 @@ export default {
     };
     return {
       loginForm: {
-        username: 'admin',
+        usercode: 'admin',
         password: 'admin'
       },
       loginRules: {
-        username: [{
+        usercode: [{
           required: true,
           message: '账户不能为空',
           trigger: 'blur'
