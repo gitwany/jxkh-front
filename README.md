@@ -34,10 +34,10 @@
     }
     location /jwt/ {
         # 转发请求到后端服务网关
-        proxy_pass http://127.0.0.1:8765/jwt/;
+        proxy_pass http://127.0.0.1:7001/jwt/;
     }
     location /api/ {
-        proxy_pass http://127.0.0.1:8765/api/;
+        proxy_pass http://127.0.0.1:7001/api/;
      }
 ```
 
