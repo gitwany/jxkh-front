@@ -1,43 +1,35 @@
 <template>
   <div class="app-container calendar-list-container">
     <div class="filter-container">
-      <el-date-picker v-model="form.searchDate" type="daterange" range-separator="至"
-                      value-format="yyyy-MM-dd" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
-      <el-select style="width: 200px;" class="filter-item" placeholder="区划" v-model="form.xzqh">
-        <el-option key="" label="全部区划" value=""></el-option>
-        <el-option v-for="item in xzqhDict" :key="item.dm" :label="item.mc" :value="item.dm" > </el-option>
-      </el-select>
-      <el-select style="width: 200px;" class="filter-item" placeholder="类别" v-model="form.kplb">
-        <el-option key="" label="全部类别" value=""></el-option>
-        <el-option v-for="item in kplbDict" :key="item.dm" :label="item.mc" :value="item.dm" > </el-option>
-      </el-select>
+      <el-input @keyup.enter.native="handleFilter" style="width: 200px;" class="filter-item" placeholder="姓名或账户" v-model="listQuery.name"> </el-input>
       <el-button class="filter-item" type="primary" v-waves icon="search" @click="handleFilter">搜索</el-button>
       <el-button class="filter-item"  v-if="userManager_btn_add"  style="margin-left: 10px;" @click="handleCreate" type="primary" icon="edit">问题录入</el-button>
     </div>
-
+    <!--<el-cascader
+      :options="options2"
+      @active-item-change="handleItemChange"
+      :props="props"
+    ></el-cascader>-->
     <el-table :key='tableKey' :data="list" v-loading.body="listLoading" border fit highlight-current-row style="width: 100%">
       <el-table-column align="center" label="序号" width="65"> <template scope="scope">
         <span>{{scope.row.id}}</span>
       </template> </el-table-column>
-      <el-table-column width="160" align="center" label="提交时间"> <template scope="scope">
-        <span>{{scope.row.createTime}}</span>
-      </template> </el-table-column>
       <el-table-column width="110" align="center" label="区名"> <template scope="scope">
         <span>{{scope.row.xzqh}}</span>
       </template> </el-table-column>
-      <el-table-column width="110" align="center" label="类别"> <template scope="scope">
+      <el-table-column width="150" align="center" label="类别"> <template scope="scope">
         <span>{{scope.row.kplb}}</span>
       </template> </el-table-column>
-      <el-table-column width="110" align="center" label="街道"> <template scope="scope">
+      <el-table-column width="150" align="center" label="街道"> <template scope="scope">
         <span>{{scope.row.jddm}}</span>
       </template> </el-table-column>
-      <el-table-column width="110" align="center" label="道路"> <template scope="scope">
+      <el-table-column width="150" align="center" label="道路"> <template scope="scope">
         <span>{{scope.row.dldm}}</span>
       </template> </el-table-column>
-      <el-table-column width="110" align="center" label="考评项目"> <template scope="scope">
+      <el-table-column width="150" align="center" label="考评项目"> <template scope="scope">
         <span>{{scope.row.kpdx}}</span>
       </template> </el-table-column>
-      <el-table-column width="110" align="center" label="考评子项"> <template scope="scope">
+      <el-table-column width="150" align="center" label="考评子项"> <template scope="scope">
         <span>{{scope.row.kpxx}}</span>
       </template> </el-table-column>
       <el-table-column width="90" align="center" label="计量"> <template scope="scope">
@@ -49,25 +41,19 @@
       <el-table-column width="90" align="center" label="整改上限时间"> <template scope="scope">
         <span>{{scope.row.ztsxsj}}</span>
       </template> </el-table-column>
-      <el-table-column align="center" label="操作" width="240" fixed="right"> <template scope="scope">
+      <el-table-column align="center" label="操作" width="150"> <template scope="scope">
         <el-button v-if="scope.row.actName=='区级分派'" size="small" type="success" @click="handleFenpai(scope.row)">分派
         </el-button>
         <el-button v-if="scope.row.actName=='整改审核'" size="small" type="warning" @click="handleShenhe(scope.row)">审核
         </el-button>
-        <el-button v-if="scope.row.actName=='任务签收'" size="small" type="success" @click="handleFenpai(scope.row)">分派
-        </el-button>
-        <el-button v-if="scope.row.actName=='任务签收'" size="small" type="warning" @click="handleXiuzheng(scope.row)">修正
-        </el-button>
         <el-button v-if="scope.row.actName=='任务签收'" size="small" type="primary" @click="handleZhenggai(scope.row)">整改
-        </el-button>
-        <el-button v-if="scope.row.actName=='责任人签收'" size="small" type="primary" @click="handleZhenggai(scope.row)">整改
         </el-button>
       </template> </el-table-column>
     </el-table>
     <div v-show="!listLoading" class="pagination-container">
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page.sync="listQuery.page" :page-sizes="[10,20,30, 50]" :page-size="listQuery.limit" layout="total, sizes, prev, pager, next, jumper" :total="total"> </el-pagination>
     </div>
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" :fullscreen="true">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form :model="form" :rules="rules" ref="form" label-width="100px" enctype="multipart/form-data">
         <el-form-item label="区名">
           <el-select class="filter-item" v-model="form.xzqh" placeholder="请选择" @change="loadDict('xzqh',form.xzqh)">
@@ -140,37 +126,26 @@
           </el-select>
         </el-form-item>
         <el-form-item label="计量">
-          <el-input class="filter-item" v-model="form.jl" size="normal" type="number" min="1" style="width: 20%"/>
+          <el-input class="filter-item" v-model="form.jl" />
         </el-form-item>
         <el-form-item label="描述">
-          <el-input type="textarea" :autosize="{ minRows: 3, maxRows: 5}" placeholder="请输入内容" v-model="form.bz"> </el-input>
+          <el-input type="textarea" :autosize="{ minRows: 3, maxRows: 5}" placeholder="请输入内容" v-model="form.description"> </el-input>
         </el-form-item>
         <el-form-item label="整改前照片" v-if="dialogStatus=='create'" >
-        <el-upload
-          :action="imgAction"
-          list-type="picture-card"
-          :on-preview="handlePictureCardPreview"
-          :on-remove="handleRemove"
-          :on-success="afterUpload"
-          name="Photos"
-          :file-list="form.fileList"
-          :auto-upload="true">
-          <i class="el-icon-plus"></i>
-        </el-upload>
-        <el-dialog :visible.sync="dialogVisible">
-          <img width="100%" :src="dialogImageUrl" alt="">
-        </el-dialog>
-        </el-form-item>
-        <el-form-item label="地理位置">
-          <mapDrag @drag="dragMap" :dragMode="this.dragMode" :lat="this.dragData.lat" :lng="this.dragData.lng" class="mapbox"></mapDrag>
-          <ul class="info">
-            <li><span>经度：</span>{{ dragData.lng }}</li>
-            <li><span>纬度：</span>{{ dragData.lat }}</li>
-            <li><span>地址：</span>{{ dragData.address }}</li>
-            <li><span>最近的路口：</span>{{ dragData.nearestJunction }}</li>
-            <li><span>最近的路：</span>{{ dragData.nearestRoad }}</li>
-            <li><span>最近的POI：</span>{{ dragData.nearestPOI }}</li>
-          </ul>
+          <el-upload
+            :action="imgAction"
+            list-type="picture-card"
+            :on-preview="handlePictureCardPreview"
+            :on-remove="handleRemove"
+            :on-success="afterUpload"
+            name="Photos"
+            :file-list="form.fileList"
+            :auto-upload="true">
+            <i class="el-icon-plus"></i>
+          </el-upload>
+          <el-dialog :visible.sync="dialogVisible">
+            <img width="100%" :src="dialogImageUrl" alt="">
+          </el-dialog>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -182,156 +157,12 @@
       <el-form :model="form_fp" :rules="rules" ref="form_fp" label-width="100px" enctype="multipart/form-data">
         <el-row :gutter="50">
           <el-col :span="12">
-        <el-form-item label="区级分派">
-          <el-select filterable class="filter-item" v-model="form_fp.jddm_fp" placeholder="请选择">
-            <el-option v-if="!dialogVisible_jdfp" v-for="item in qjfpDict" :key="item.dm" :label="item.mc" :value="item.dm"> </el-option>
-            <el-option v-if="dialogVisible_jdfp" v-for="item in jdfpDict" :key="item.dm" :label="item.mc" :value="item.dm"> </el-option>
-          </el-select>
-        </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="cancel('form_fp')">取 消</el-button>
-        <el-button v-if="!dialogVisible_jdfp" type="primary" @click="qfp(form_fp)">确 定</el-button>
-        <el-button v-if="dialogVisible_jdfp" type="primary" @click="jdfp(form_fp)">确 定</el-button>
-      </div>
-
-      <template>
-        <el-tabs v-model="activeName" @tab-click="handleClick">
-          <el-tab-pane label="问题详情" name="first">
-            <el-form>
-              <el-row :gutter="50">
-                <el-col :span="24">
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="区名">
-                        <el-input :disabled="true" :value="this.wtsb.xzqh_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="jd_fp">
-                      <el-form-item class="filter-item" label="街道">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="zcgd_fp">
-                      <el-form-item class="filter-item" label="主次干道">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="gl_fp">
-                      <el-form-item class="filter-item" label="公路">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="hp_fp">
-                      <el-form-item class="filter-item" label="湖泊明渠">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="道路">
-                        <el-input :disabled="true" :value="this.wtsb.dldm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="类别">
-                        <el-input :disabled="true" :value="this.wtsb.kplb_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="考评项目">
-                        <el-input :disabled="true" :value="this.wtsb.kpdx_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="考评子项">
-                        <el-input :disabled="true" :value="this.wtsb.kpxx_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <el-form-item label="计量">
-                        <el-input :disabled="true" :value="this.wtsb.jl">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item label="上报机构">
-                        <el-input :disabled="true" :value="this.wtsb.jl">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item label="上报人">
-                        <el-input :disabled="true" :value="this.wtsb.jl">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
-                </el-col>
-                <el-col :span="24">
-                  <template>
-                    <mapDrag  @drag="dragMap" :dragMode="this.dragMode" :lat="this.dragData.lat" :lng="this.dragData.lng" class="mapbox"></mapDrag>
-                  </template>
-                  <ul class="info">
-                    <li><span>经度：</span>{{ dragData.lng }}</li>
-                    <li><span>纬度：</span>{{ dragData.lat }}</li>
-                    <li><span>地址：</span>{{ dragData.address }}</li>
-                    <li><span>最近的路口：</span>{{ dragData.nearestJunction }}</li>
-                    <li><span>最近的路：</span>{{ dragData.nearestRoad }}</li>
-                    <li><span>最近的POI：</span>{{ dragData.nearestPOI }}</li>
-                  </ul>
-                </el-col>
-              </el-row>
-            </el-form>
-          </el-tab-pane>
-          <el-tab-pane label="问题图片" name="second">
-            <el-form>
-            <el-row :gutter="50">
-              <el-col :span="24">
-                <el-form-item class="filter-item" label="整改前照片" v-for="img in imgBzg" :key="img" >
-                  <img :src="img" style="width:200px" />
-                </el-form-item>
-              </el-col>
-            </el-row>
-            </el-form>
-          </el-tab-pane>
-          <el-tab-pane label="问题流程" name="third">
-            <el-table :data="workflow" style="width: 100%">
-              <el-table-column prop="actName" label="阶段名称" ></el-table-column>
-              <el-table-column prop="assignee" label="处理人" ></el-table-column>
-              <el-table-column prop="startTime" label="开始时间" ></el-table-column>
-              <el-table-column prop="endTime" label="结束时间" ></el-table-column>
-              <el-table-column prop="duration" label="持续时间(分钟)" ></el-table-column>
-              <el-table-column prop="bz" label="备注" ></el-table-column>
-            </el-table>
-          </el-tab-pane>
-        </el-tabs>
-      </template>
-
-    </el-dialog>
-
-    <!--修正xiuzheng-->
-    <el-dialog :title="textMap['xiuzheng']" :visible.sync="dialogVisible_xz" :fullscreen="true">
-      <el-form :model="form_fp" :rules="rules" ref="form_fp" label-width="100px" enctype="multipart/form-data">
-        <el-row :gutter="50">
-          <el-col :span="12">
-            <el-form-item label="修正原因">
-              <el-select filterable class="filter-item" v-model="form_fp.jddm_fp" placeholder="请选择">
-                <el-option v-for="item in jdfpDict" :key="item.dm" :label="item.mc" :value="item.dm"> </el-option>
+            <el-form-item label="区级分派">
+              <el-select  class="filter-item" v-model="form_fp.jddm_fp" placeholder="请选择">
+                <el-option v-if="jd_fp" v-for="item in jdDict" :key="item.dm" :label="item.mc" :value="item.dm"> </el-option>
+                <el-option v-if="zcgd_fp" v-for="item in zcgdDict" :key="item.dm" :label="item.mc" :value="item.dm"> </el-option>
+                <el-option v-if="gl_fp" v-for="item in glDict" :key="item.dm" :label="item.mc" :value="item.dm"> </el-option>
+                <el-option v-if="hp_fp" v-for="item in hpDict" :key="item.dm" :label="item.mc" :value="item.dm"> </el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -339,105 +170,79 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancel('form_fp')">取 消</el-button>
-        <el-button type="primary" @click="xz(form_fp)">确 定</el-button>
+        <el-button type="primary" @click="qfp(form_fp)">确 定</el-button>
       </div>
+
       <template>
         <el-tabs v-model="activeName" @tab-click="handleClick">
           <el-tab-pane label="问题详情" name="first">
             <el-form>
               <el-row :gutter="50">
-                <el-col :span="24">
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="区名">
-                        <el-input :disabled="true" :value="this.wtsb.xzqh_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="jd_fp">
-                      <el-form-item class="filter-item" label="街道">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="zcgd_fp">
-                      <el-form-item class="filter-item" label="主次干道">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="gl_fp">
-                      <el-form-item class="filter-item" label="公路">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="hp_fp">
-                      <el-form-item class="filter-item" label="湖泊明渠">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="道路">
-                        <el-input :disabled="true" :value="this.wtsb.dldm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="类别">
-                        <el-input :disabled="true" :value="this.wtsb.kplb_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="考评项目">
-                        <el-input :disabled="true" :value="this.wtsb.kpdx_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="考评子项">
-                        <el-input :disabled="true" :value="this.wtsb.kpxx_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <el-form-item label="计量">
-                        <el-input :disabled="true" :value="this.wtsb.jl">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item label="上报机构">
-                        <el-input :disabled="true" :value="this.wtsb.jl">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item label="上报人">
-                        <el-input :disabled="true" :value="this.wtsb.jl">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="区名">
+                    <el-input :disabled="true" :value="this.wtsb.xzqh_cn">
+                    </el-input>
+                  </el-form-item>
                 </el-col>
-                <el-col :span="24">
-                  <template>
-                    <mapDrag  @drag="dragMap" :dragMode="this.dragMode" :lat="this.dragData.lat" :lng="this.dragData.lng" class="mapbox"></mapDrag>
-                  </template>
-                  <ul class="info">
-                    <li><span>经度：</span>{{ dragData.lng }}</li>
-                    <li><span>纬度：</span>{{ dragData.lat }}</li>
-                    <li><span>地址：</span>{{ dragData.address }}</li>
-                    <li><span>最近的路口：</span>{{ dragData.nearestJunction }}</li>
-                    <li><span>最近的路：</span>{{ dragData.nearestRoad }}</li>
-                    <li><span>最近的POI：</span>{{ dragData.nearestPOI }}</li>
-                  </ul>
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="类别">
+                    <el-input :disabled="true" :value="this.wtsb.kplb_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="50">
+                <el-col :span="12" v-if="jd_fp">
+                  <el-form-item class="filter-item" label="街道">
+                    <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12" v-if="zcgd_fp">
+                  <el-form-item class="filter-item" label="主次干道">
+                    <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12" v-if="gl_fp">
+                  <el-form-item class="filter-item" label="公路">
+                    <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12" v-if="hp_fp">
+                  <el-form-item class="filter-item" label="湖泊明渠">
+                    <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="道路">
+                    <el-input :disabled="true" :value="this.wtsb.dldm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="50">
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="考评项目">
+                    <el-input :disabled="true" :value="this.wtsb.kpdx_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="考评子项">
+                    <el-input :disabled="true" :value="this.wtsb.kpxx_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="50">
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="计量">
+                    <el-input :disabled="true" :value="this.wtsb.jl">
+                    </el-input>
+                  </el-form-item>
                 </el-col>
               </el-row>
             </el-form>
@@ -447,6 +252,11 @@
               <el-row :gutter="50">
                 <el-col :span="24">
                   <el-form-item class="filter-item" label="整改前照片" v-for="img in imgBzg" :key="img" >
+                    <img :src="img" style="width:200px" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="24">
+                  <el-form-item class="filter-item" label="整改后照片" v-for="img in imgAzg" :key="img" >
                     <img :src="img" style="width:200px" />
                   </el-form-item>
                 </el-col>
@@ -467,12 +277,11 @@
       </template>
 
     </el-dialog>
-
     <el-dialog :title="textMap[zhenggai]" :visible.sync="dialogVisible_zg" :fullscreen="true">
       <el-form :model="form" :rules="rules" ref="form" label-width="100px" enctype="multipart/form-data">
-       <!-- <el-form-item label="整改前照片">
-          <img :src="img" width="100px"  v-for="img in imgBzg" :key="img"/>
-        </el-form-item>-->
+        <!-- <el-form-item label="整改前照片">
+           <img :src="img" width="100px"  v-for="img in imgBzg" :key="img"/>
+         </el-form-item>-->
         <el-form-item label="整改后照片">
           <el-upload
             :action="imgAction_after"
@@ -489,104 +298,78 @@
             <img width="100%" :src="dialogImageUrl" alt="">
           </el-dialog>
         </el-form-item>
+
         <hr style="color:#e0e0e0" />
         <template>
           <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="问题详情" name="first">
               <el-form>
                 <el-row :gutter="50">
-                  <el-col :span="24">
-                    <el-row :gutter="20">
-                      <el-col :span="6">
-                        <el-form-item class="filter-item" label="区名">
-                          <el-input :disabled="true" :value="this.wtsb.xzqh_cn">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                      <el-col :span="6" v-if="jd_fp">
-                        <el-form-item class="filter-item" label="街道">
-                          <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                      <el-col :span="6" v-if="zcgd_fp">
-                        <el-form-item class="filter-item" label="主次干道">
-                          <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                      <el-col :span="6" v-if="gl_fp">
-                        <el-form-item class="filter-item" label="公路">
-                          <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                      <el-col :span="6" v-if="hp_fp">
-                        <el-form-item class="filter-item" label="湖泊明渠">
-                          <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                      <el-col :span="6">
-                        <el-form-item class="filter-item" label="道路">
-                          <el-input :disabled="true" :value="this.wtsb.dldm_cn">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                    </el-row>
-                    <el-row :gutter="20">
-                      <el-col :span="6">
-                        <el-form-item class="filter-item" label="类别">
-                          <el-input :disabled="true" :value="this.wtsb.kplb_cn">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                      <el-col :span="6">
-                        <el-form-item class="filter-item" label="考评项目">
-                          <el-input :disabled="true" :value="this.wtsb.kpdx_cn">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                      <el-col :span="6">
-                        <el-form-item class="filter-item" label="考评子项">
-                          <el-input :disabled="true" :value="this.wtsb.kpxx_cn">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                    </el-row>
-                    <el-row :gutter="20">
-                      <el-col :span="6">
-                        <el-form-item label="计量">
-                          <el-input :disabled="true" :value="this.wtsb.jl">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                      <el-col :span="6">
-                        <el-form-item label="上报机构">
-                          <el-input :disabled="true" :value="this.wtsb.jl">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                      <el-col :span="6">
-                        <el-form-item label="上报人">
-                          <el-input :disabled="true" :value="this.wtsb.jl">
-                          </el-input>
-                        </el-form-item>
-                      </el-col>
-                    </el-row>
+                  <el-col :span="12">
+                    <el-form-item class="filter-item" label="区名">
+                      <el-input :disabled="true" :value="this.wtsb.xzqh_cn">
+                      </el-input>
+                    </el-form-item>
                   </el-col>
-                  <el-col :span="24">
-                    <template>
-                      <mapDrag @drag="dragMap" :dragMode="this.dragMode" :lat="this.dragData.lat" :lng="this.dragData.lng" class="mapbox"></mapDrag>
-                    </template>
-                    <ul class="info">
-                      <li><span>经度：</span>{{ dragData.lng }}</li>
-                      <li><span>纬度：</span>{{ dragData.lat }}</li>
-                      <li><span>地址：</span>{{ dragData.address }}</li>
-                      <li><span>最近的路口：</span>{{ dragData.nearestJunction }}</li>
-                      <li><span>最近的路：</span>{{ dragData.nearestRoad }}</li>
-                      <li><span>最近的POI：</span>{{ dragData.nearestPOI }}</li>
-                    </ul>
+                  <el-col :span="12">
+                    <el-form-item class="filter-item" label="类别">
+                      <el-input :disabled="true" :value="this.wtsb.kplb_cn">
+                      </el-input>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row :gutter="50">
+                  <el-col :span="12" v-if="jd_fp">
+                    <el-form-item class="filter-item" label="街道">
+                      <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                      </el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12" v-if="zcgd_fp">
+                    <el-form-item class="filter-item" label="主次干道">
+                      <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                      </el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12" v-if="gl_fp">
+                    <el-form-item class="filter-item" label="公路">
+                      <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                      </el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12" v-if="hp_fp">
+                    <el-form-item class="filter-item" label="湖泊明渠">
+                      <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                      </el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item class="filter-item" label="道路">
+                      <el-input :disabled="true" :value="this.wtsb.dldm_cn">
+                      </el-input>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row :gutter="50">
+                  <el-col :span="12">
+                    <el-form-item class="filter-item" label="考评项目">
+                      <el-input :disabled="true" :value="this.wtsb.kpdx_cn">
+                      </el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item class="filter-item" label="考评子项">
+                      <el-input :disabled="true" :value="this.wtsb.kpxx_cn">
+                      </el-input>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row :gutter="50">
+                  <el-col :span="12">
+                    <el-form-item class="filter-item" label="计量">
+                      <el-input :disabled="true" :value="this.wtsb.jl">
+                      </el-input>
+                    </el-form-item>
                   </el-col>
                 </el-row>
               </el-form>
@@ -596,12 +379,12 @@
                 <el-row :gutter="50">
                   <el-col :span="24">
                     <el-form-item class="filter-item" label="整改前照片" v-for="img in imgBzg" :key="img" >
-                      <img :src="img" style="width:200px"  />
+                      <img :src="img" style="width:200px" />
                     </el-form-item>
                   </el-col>
                   <el-col :span="24">
                     <el-form-item class="filter-item" label="整改后照片" v-for="img in imgAzg" :key="img" >
-                      <img :src="img" style="width:200px"  />
+                      <img :src="img" style="width:200px" />
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -616,6 +399,7 @@
                 <el-table-column prop="duration" label="持续时间(分钟)" ></el-table-column>
                 <el-table-column prop="bz" label="备注" ></el-table-column>
               </el-table>
+
             </el-tab-pane>
           </el-tabs>
         </template>
@@ -631,98 +415,71 @@
           <el-tab-pane label="问题详情" name="first">
             <el-form>
               <el-row :gutter="50">
-                <el-col :span="24">
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="区名">
-                        <el-input :disabled="true" :value="this.wtsb.xzqh_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="jd_fp">
-                      <el-form-item class="filter-item" label="街道">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="zcgd_fp">
-                      <el-form-item class="filter-item" label="主次干道">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="gl_fp">
-                      <el-form-item class="filter-item" label="公路">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6" v-if="hp_fp">
-                      <el-form-item class="filter-item" label="湖泊明渠">
-                        <el-input :disabled="true" :value="this.wtsb.jddm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="道路">
-                        <el-input :disabled="true" :value="this.wtsb.dldm_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="类别">
-                        <el-input :disabled="true" :value="this.wtsb.kplb_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="考评项目">
-                        <el-input :disabled="true" :value="this.wtsb.kpdx_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item class="filter-item" label="考评子项">
-                        <el-input :disabled="true" :value="this.wtsb.kpxx_cn">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
-                  <el-row :gutter="20">
-                    <el-col :span="6">
-                      <el-form-item label="计量">
-                        <el-input :disabled="true" :value="this.wtsb.jl">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item label="上报机构">
-                        <el-input :disabled="true" :value="this.wtsb.jl">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
-                      <el-form-item label="上报人">
-                        <el-input :disabled="true" :value="this.wtsb.jl">
-                        </el-input>
-                      </el-form-item>
-                    </el-col>
-                  </el-row>
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="区名">
+                    <el-input :disabled="true" :value="this.wtsb.xzqh_cn">
+                    </el-input>
+                  </el-form-item>
                 </el-col>
-                <el-col :span="24">
-                  <template>
-                    <mapDrag @drag="dragMap" :dragMode="this.dragMode" :lat="this.dragData.lat" :lng="this.dragData.lng" class="mapbox"></mapDrag>
-                  </template>
-                  <ul class="info">
-                    <li><span>经度：</span>{{ dragData.lng }}</li>
-                    <li><span>纬度：</span>{{ dragData.lat }}</li>
-                    <li><span>地址：</span>{{ dragData.address }}</li>
-                    <li><span>最近的路口：</span>{{ dragData.nearestJunction }}</li>
-                    <li><span>最近的路：</span>{{ dragData.nearestRoad }}</li>
-                    <li><span>最近的POI：</span>{{ dragData.nearestPOI }}</li>
-                  </ul>
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="类别">
+                    <el-input :disabled="true" :value="this.wtsb.kplb_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="50">
+                <el-col :span="12" v-if="jd_fp">
+                  <el-form-item class="filter-item" label="街道">
+                    <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12" v-if="zcgd_fp">
+                  <el-form-item class="filter-item" label="主次干道">
+                    <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12" v-if="gl_fp">
+                  <el-form-item class="filter-item" label="公路">
+                    <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12" v-if="hp_fp">
+                  <el-form-item class="filter-item" label="湖泊明渠">
+                    <el-input :disabled="true" :value="this.wtsb.jddm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="道路">
+                    <el-input :disabled="true" :value="this.wtsb.dldm_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="50">
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="考评项目">
+                    <el-input :disabled="true" :value="this.wtsb.kpdx_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="考评子项">
+                    <el-input :disabled="true" :value="this.wtsb.kpxx_cn">
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="50">
+                <el-col :span="12">
+                  <el-form-item class="filter-item" label="计量">
+                    <el-input :disabled="true" :value="this.wtsb.jl">
+                    </el-input>
+                  </el-form-item>
                 </el-col>
               </el-row>
             </el-form>
@@ -732,12 +489,12 @@
               <el-row :gutter="50">
                 <el-col :span="24">
                   <el-form-item class="filter-item" label="整改前照片" v-for="img in imgBzg" :key="img" >
-                    <img :src="img" style="width:200px"   />
+                    <img :src="img" style="width:200px" />
                   </el-form-item>
                 </el-col>
                 <el-col :span="24">
                   <el-form-item class="filter-item" label="整改后照片" v-for="img in imgAzg" :key="img" >
-                    <img :src="img" style="width:200px"   />
+                    <img :src="img" style="width:200px" />
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -760,14 +517,11 @@
         <el-button type="primary" @click="shenhe('审核通过')">审核 通过</el-button>
       </div>
     </el-dialog>
-
   </div>
 </template>
 
 <script>
-  /* eslint-disable no-array-constructor */
 
-  import '../mapDrag/index'
   import { mapGetters } from 'vuex'
   import {
     getDict,
@@ -779,17 +533,14 @@
     fp,
     zg,
     sh,
-    workflow,
-    jdfp
+    workflow
   } from 'api/admin/issue/index'
   import '../../components/upload'
   import store from 'store/index'
-  import mapDrag from '@/components/mapDrag/index.vue'
   export default {
     name: 'user',
     data() {
       return {
-        dragMode: '',
         activeName: 'first',
         options2: [{
           label: '江苏',
@@ -808,9 +559,6 @@
         kplbDict: undefined,
         kpdxDict: undefined,
         kpxxDict: undefined,
-        deptDict: undefined, // 部门
-        qjfpDict: undefined, // 区级街道+部门分派字典
-        jdfpDict: undefined, // 街道责任人分派字典
         jdDict: undefined, // 街道
         dlDict: undefined, // 道路
         jzdlDict: undefined, // 集镇道路=道路
@@ -826,12 +574,6 @@
         id: undefined,
         kplb: undefined,
         form: {
-          dz: undefined,
-          bz: undefined,
-          gdgps: undefined,
-          searchDate: undefined,
-          searchDateBeg: undefined,
-          searchDateEnd: undefined,
           xzqh: undefined,
           kplb: undefined,
           dldm: undefined,
@@ -853,8 +595,7 @@
         form_fp: {
           id: undefined,
           taskId: undefined,
-          jddm_fp: undefined,
-          userId: undefined
+          jddm_fp: undefined
         },
         rules: {
 
@@ -903,8 +644,7 @@
           create: '创建',
           fenpai: '分派',
           zhanggai: '整改',
-          shenhe: '审核',
-          xiuzheng: '修正'
+          shenhe: '审核'
         },
         tableKey: 0,
         dialogImageUrl: 'D:\\cyber\\test.jpg',
@@ -914,6 +654,24 @@
         imgAfterZg: [],
         imgAzg: [],
         imgBzg: [],
+        // workflow: [],
+        tableData: [{
+          date: '2016-05-02',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1518 弄'
+        }, {
+          date: '2016-05-04',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1517 弄'
+        }, {
+          date: '2016-05-01',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1519 弄'
+        }, {
+          date: '2016-05-03',
+          name: '王小虎',
+          address: '上海市普陀区金沙江路 1516 弄'
+        }],
         workflow: [{
           actName: '1',
           assignee: undefined,
@@ -922,7 +680,6 @@
           startTime: undefined
         }],
         wtsb: {
-          gdgps: ['', ''],
           xzqh: undefined,
           kplb: undefined,
           kpdx: undefined,
@@ -936,14 +693,6 @@
           dldm_cn: undefined,
           jddm_cn: undefined,
           jl: undefined
-        },
-        dragData: {
-          lng: null,
-          lat: null,
-          address: null,
-          nearestJunction: null,
-          nearestRoad: null,
-          nearestPOI: null
         },
         kpdx: [{
           value: 1,
@@ -974,52 +723,12 @@
       this.userManager_btn_del = this.elements['userManager:btn_del'];
       this.userManager_btn_add = this.elements['userManager:btn_add'];
     },
-    mounted() {
-      getDict('xzqh', '')
-        .then(response => {
-          this.xzqhDict = response.data
-        })
-      getDict('kplb', '')
-        .then(response => {
-          this.kplbDict = response.data
-        })
-    },
-    components: {
-      mapDrag
-    },
     computed: {
       ...mapGetters([
         'elements'
       ])
     },
     methods: {
-      // 搜索
-      handleSearch() {
-        if (this.searchKey) {
-          this.placeSearch.search(this.searchKey);
-          this.placeSearch.clear()
-        }
-      },
-      dragMap(data) {
-        this.dragData = {
-          lng: data.position.lng,
-          lat: data.position.lat,
-          address: data.address,
-          nearestJunction: data.nearestJunction,
-          nearestRoad: data.nearestRoad,
-          nearestPOI: data.nearestPOI
-        }
-      },
-      dragMap_init(data) {
-        this.dragData = {
-          lng: data.lng,
-          lat: data.lat,
-          address: data.address,
-          nearestJunction: data.nearestJunction,
-          nearestRoad: data.nearestRoad,
-          nearestPOI: data.nearestPOI
-        }
-      },
       handleClick(tab, event) {
         // console.log(tab, event);
       },
@@ -1029,17 +738,13 @@
       afterUpload_zg(response, file, fileList) {
         this.form.zghzp += response.data + ','
       },
-      handleXiuzheng(row) {
-
-      },
       handleFenpai(row) {
-        this.dragMode = 'dragMarker'
         this.form_fp.id = row.id
         this.form_fp.taskId = row.taskId
         this.dialogVisible_qjfp = true
         if (row.actName === '区级分派') {
-          this.dialogVisible_jdfp = false
-        } if (row.actName === '任务签收') {
+          this.dialogVisible_qjfp = true
+        } if (row.actName === '街道分派') {
           this.dialogVisible_jdfp = true
         }
         this.workflow.splice(0, this.workflow.length)
@@ -1047,23 +752,11 @@
           this.workflow = response
         })
         getOne(row.id).then(response => { // 获取详情
-          this.resetMap()
           this.imgBzg.splice(0, this.imgBzg.length)
           this.imgAzg.splice(0, this.imgAzg.length)
           this.loadDict('xzqh', response.xzqh) // 加载字典
-          this.load3Dict(response.jddm)
-          this.dragData.address = response.dz
-          alert(this.dragData.address)
+          this.imgBzg.splice(0, this.imgBzg.length)
           this.wtsb = response
-          if (this.wtsb.gdgps === null) {
-            this.dragData.lng = '114.306509'
-            this.dragData.lat = '30.598846'
-          } else {
-            const gps = this.wtsb.gdgps.split(',')
-            this.dragData.lat = gps[0]
-            this.dragData.lng = gps[1]
-          }
-          this.dragMap_init(this.dragData)
           if (this.wtsb.kplb_cn === '背街小巷' || this.wtsb.kplb_cn === '集镇道路' || this.wtsb.kplb_cn === '居民社区' || this.wtsb.kplb_cn === '铁路沿线' || this.wtsb.kplb == '城中村') {
             this.jd_fp = true
           }
@@ -1099,22 +792,7 @@
             });
           })
       },
-      jdfp(form) {
-        jdfp(form.id, form.taskId, form.userId)
-          .then(() => {
-            this.dialogVisible_qjfp = false;
-            this.getList();
-            this.$notify({
-              title: '成功',
-              message: '分派成功',
-              type: 'success',
-              duration: 2000
-            });
-          })
-      },
       handleShenhe(row) {
-        this.dragMode = 'dragMarker'
-        // this.$store.commit('setDragEnable', false)
         this.form_fp.id = row.id
         this.form_fp.taskId = row.taskId
         this.workflow.splice(0, this.workflow.length)
@@ -1122,21 +800,9 @@
           this.workflow = response
         })
         getOne(row.id).then(response => {
-          this.resetMap()
           this.imgBzg.splice(0, this.imgBzg.length)
           this.imgAzg.splice(0, this.imgAzg.length)
           this.wtsb = response
-          this.dragData.address = response.dz
-          if (this.wtsb.gdgps === null) {
-            this.dragData.lng = '114.306509'
-            this.dragData.lat = '30.598846'
-          } else {
-            const gps = this.wtsb.gdgps.split(',')
-            this.dragData.lat = gps[0]
-            this.dragData.lng = gps[1]
-            this.dragData.address = response.dz
-          }
-          this.dragMap_init(this.dragData)
           if (response.zgqzp != undefined && response.zgqzp != '') {
             this.imgBeforeZg = response.zgqzp.split(',')
             for (const idx in this.imgBeforeZg) {
@@ -1170,8 +836,6 @@
           })
       },
       handleZhenggai(row) {
-        this.dragMode = 'dragMarker'
-        // this.$store.commit('setDragEnable', true)
         this.imgBzg.splice(0, this.imgBzg.length)
         this.form_fp.id = row.id
         this.form_fp.taskId = row.taskId
@@ -1180,20 +844,9 @@
           this.workflow = response
         })
         getOne(row.id).then(response => {
-          this.resetMap()
           this.imgBzg.splice(0, this.imgBzg.length)
           this.imgAzg.splice(0, this.imgAzg.length)
           this.wtsb = response
-          this.dragData.address = response.dz
-          if (this.wtsb.gdgps === null) {
-            this.dragData.lng = '114.306509'
-            this.dragData.lat = '30.598846'
-          } else {
-            const gps = this.wtsb.gdgps.split(',')
-            this.dragData.lat = gps[0]
-            this.dragData.lng = gps[1]
-          }
-          this.dragMap_init(this.dragData)
           this.imgBeforeZg = response.zgqzp.split(',')
           for (const index in this.imgBeforeZg) {
             getImg(this.imgBeforeZg[index]).then(response => {
@@ -1223,26 +876,9 @@
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
       },
-      imgPreview(src) {
-        this.dialogImageUrl = src;
-        // this.dialogVisible = true;
-      },
       getList() {
         this.listLoading = true;
-        page(this.listQuery, this.form)
-          .then(response => {
-            this.list = response.data.rows;
-            this.total = response.data.total;
-            this.listLoading = false;
-          })
-      },
-      searchList() {
-        this.listLoading = true;
-        if (this.form.searchDate !== undefined) {
-          this.form.searchDateBeg = this.form.searchDate[0].toString()
-          this.form.searchDateEnd = this.form.searchDate[1].toString()
-        }
-        page(this.listQuery, this.form)
+        page(this.listQuery)
           .then(response => {
             this.list = response.data.rows;
             this.total = response.data.total;
@@ -1250,7 +886,7 @@
           })
       },
       handleFilter() {
-        this.searchList();
+        this.getList();
       },
       handleSizeChange(val) {
         this.listQuery.limit = val;
@@ -1261,18 +897,17 @@
         this.getList();
       },
       handleCreate() {
-        this.dragMode = 'dragMap'
         this.resetTemp();
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
-        // getDict('xzqh', '')
-        //   .then(response => {
-        //     this.xzqhDict = response.data
-        //   })
-        // getDict('kplb', '')
-        //   .then(response => {
-        //     this.kplbDict = response.data
-        //   })
+        getDict('xzqh', '')
+          .then(response => {
+            this.xzqhDict = response.data
+          })
+        getDict('kplb', '')
+          .then(response => {
+            this.kplbDict = response.data
+          })
       },
       load3Dict(pdm) { // 通过街道代码，加载第三级字典
         this.jddlVisible = false
@@ -1283,11 +918,6 @@
         this.form.sq = undefined
         this.form.tl = undefined
         this.form.czc = undefined
-        // 街道分派字典（街道责任人）
-        getDict('user', pdm)
-          .then(response => {
-            this.jdfpDict = response.data
-          })
         if (this.kplb === 'B' || this.kplb === 'C') { // 背街小巷、集镇道路加载道路代码
           this.jddlVisible = true
           getDict('jddl', pdm)
@@ -1341,12 +971,8 @@
           this.form.hp = undefined
           this.form.zcgd = undefined
           getDict('dl', pdm)
-          .then(response => {
-            this.dlDict = response.data
-          })
-          getDict('dept', pdm)
             .then(response => {
-              this.qjfpDict = response.data
+              this.dlDict = response.data
             })
           getDict('jd_jzdl', pdm)
             .then(response => {
@@ -1374,7 +1000,6 @@
             })
         }
         if (dictName === 'kplb') { // 考评类别关联考评大项、街道代码等等
-          debugger
           this.jdVisible = false
           this.glVisible = false
           this.hpVisible = false
@@ -1468,8 +1093,6 @@
           });
       },
       create(formName) {
-        this.form.gdgps = this.dragData.lat + ',' + this.dragData.lng
-        this.form.dz = this.dragData.address
         const set = this.$refs;
         set[formName].validate(valid => {
           if (valid) {
@@ -1516,16 +1139,6 @@
           }
         });
       },
-      resetMap() {
-        this.dragData = {
-          lng: null,
-          lat: null,
-          address: null,
-          nearestJunction: null,
-          nearestRoad: null,
-          nearestPOI: null
-        };
-      },
       resetTemp() {
         this.form = {
           username: undefined,
@@ -1564,19 +1177,3 @@
     }
   }
 </script>
-<style>
-  .mapbox{ width: 600px; height: 400px; margin-bottom: 20px; float: left; }
-  .info{ margin: 0; padding: 0; list-style: none; line-height: 30px; margin-left: 620px; }
-  .info span{ display: block; color: #999; }
-  .w{
-    display:block;
-    width:200px;
-    text-decoration: none;
-    top:500px;
-    clear: both;
-    color: blueviolet
-  }
-  .w:hover{
-    color:rgb(102, 17, 17);
-  }
-</style>

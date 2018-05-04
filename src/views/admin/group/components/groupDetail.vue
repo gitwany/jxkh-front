@@ -7,8 +7,6 @@
       <el-button type="primary" v-if="groupManager_btn_del" icon="delete" @click="handleDelete">删除</el-button>
       <el-button type="primary" v-if="groupManager_btn_resourceManager" @click="handlerAuthority">
         <icon-svg icon-class="quanxian1"></icon-svg>权限分配</el-button>
-      <el-button type="primary" v-if="groupManager_btn_userManager" @click="handlerUser">
-        <icon-svg icon-class="27"></icon-svg>关联用户</el-button>
     </el-button-group>
   </el-col>
   <el-col :span="8" style='margin-top:15px;'>
@@ -36,10 +34,7 @@
       </el-form-item>
     </el-form>
   </el-col>
-  <el-dialog :title="dialogUserName" :visible.sync="dialogUserVisible">
-    <group-user :groupId="currentId" @closeUserDialog="closeUserDialog" ref="groupUser"></group-user>
-  </el-dialog>
-  <el-dialog :title="dialogAuthorityName" size="large" :visible.sync="dialogAuthorityVisible">
+  <el-dialog :title="dialogAuthorityName" size="large" :visible.sync="dialogAuthorityVisible" :fullscreen="true">
     <group-authority :groupId="currentId" @closeAuthorityDialog="closeAuthorityDialog" ref="groupAuthority"></group-authority>
   </el-dialog>
 </el-row>
@@ -57,7 +52,6 @@ import { mapGetters } from 'vuex';
 export default {
   name: 'groupDetail',
   components: {
-    'group-user': () => import('./groupUser'),
     'group-authority': () => import('./groupAuthority')
   },
   props: {

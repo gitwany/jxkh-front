@@ -3,7 +3,7 @@
   <el-col :span="24">
     <el-button type="primary" v-if="groupManager_menu" @click="update">保存</el-button>
   </el-col>
-  <el-col :span="8" style='margin-top:15px;'>
+  <el-col :span="8">
     <el-input placeholder="输入关键字进行过滤" v-model="filterText"> </el-input>
     <el-tree class="filter-tree" check-strictly :node-key="getTreeNodeKey" :data="treeData" show-checkbox node-key="id" highlight-current :props="defaultProps" :filter-node-method="filterNode" ref="menuTree" @node-click="getNodeData" default-expand-all>
     </el-tree>

@@ -68,7 +68,8 @@ export default new Router({
   routes: constantRouterMap
 });
 
-export const asyncRouterMap = [{
+export const asyncRouterMap = [
+  {
   path: '/baseManager',
   component: Layout,
   name: '基础配置管理',
@@ -111,40 +112,211 @@ export const asyncRouterMap = [{
     name: '问题管理',
     authority: 'issueManager'
   }]
-}/* ,
-{
-  path: '/authManager',
-  component: Layout,
-  name: '基础配置管理',
-  icon: 'setting',
-  authority: 'authManager',
-  children: [{
-    path: 'serviceManager',
-    component: _import('auth/service/index'),
-    name: '用户管理',
-    authority: 'serviceManager'
-  }]
 },
-{
-  path: '/monitorManager',
-  component: Layout,
-  name: '监控模块管理',
-  icon: 'setting',
-  authority: 'monitorManager',
-  children: [{
-    path: 'serviceEurekaManager',
-    component: _import('monitor/eureka/index'),
-    name: 'Eureka注册中心',
-    authority: 'serviceEurekaManager'
-  }, {
-    path: 'serviceMonitorManager',
-    component: _import('monitor/service/index'),
-    name: '服务状态监控',
-    authority: 'serviceMonitorManager'
-  }, {
-    path: 'serviceZipkinManager',
-    component: _import('monitor/zipkin/index'),
-    name: '服务状态监控',
-    authority: 'serviceZipkinManager'
-  }]
-}*/];
+  {
+    path: '/taskManager',
+    component: Layout,
+    name: '任务管理',
+    icon: 'setting',
+    authority: 'taskManager',
+    children: [{
+      path: 'taskUndo',
+      icon: 'category',
+      component: _import('admin/user/index'),
+      name: '待办任务',
+      authority: 'taskUndo'
+    }, {
+      path: 'taskDone',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '已办任务',
+      authority: 'taskDone'
+    }
+    ]
+  },
+  {
+    path: '/wtManager',
+    component: Layout,
+    name: '问题管理',
+    icon: 'setting',
+    authority: 'wtManager',
+    children: [{
+      path: 'wtAdd',
+      icon: 'category',
+      component: _import('admin/user/index'),
+      name: '问题采集',
+      authority: 'wtAdd'
+    }, {
+      path: 'wtQuery',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '问题查询',
+      authority: 'wtQuery'
+    }
+    ]
+  },
+  {
+    path: '/pfManager',
+    component: Layout,
+    name: '评分管理',
+    icon: 'setting',
+    authority: 'pfManager',
+    children: [{
+      path: 'pflrManager',
+      icon: 'category',
+      component: _import('admin/user/index'),
+      name: '问题采集',
+      authority: 'pflrManager'
+    }
+    ]
+  },
+  {
+    path: '/statisManager',
+    component: Layout,
+    name: '统计分析',
+    icon: 'setting',
+    authority: 'statisManager',
+    children: [{
+      path: 'gztjManager',
+      icon: 'category',
+      component: _import('admin/user/index'),
+      name: '工作统计',
+      authority: 'gztjManager'
+    }, {
+      path: 'zztb',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '工作情况通报',
+      authority: 'zztb'
+    }, {
+      path: 'pfhz',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '评分汇总',
+      authority: 'pfhz'
+    }
+    ]
+  },
+
+  {
+    path: '/dictManager',
+    component: Layout,
+    name: '字典管理',
+    icon: 'setting',
+    authority: 'dictManager',
+    children: [{
+      path: 'tlManager',
+      icon: 'category',
+      component: _import('admin/user/index'),
+      name: '铁路点位',
+      authority: 'tlManager'
+    }, {
+      path: 'czcManager',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '城中村',
+      authority: 'czcManager'
+    }, {
+      path: 'tlManager',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '铁路',
+      authority: 'tlManager'
+    }, {
+      path: 'glManager',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '公路',
+      authority: 'glManager'
+    }, {
+      path: 'jddlManager',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '街道道路',
+      authority: 'jddlManager'
+    }, {
+      path: 'hbmqManager',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '湖泊明渠',
+      authority: 'hbmqManager'
+    }, {
+      path: 'xzqhManager',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '行政区划',
+      authority: 'xzqhManager'
+    }, {
+      path: 'zcgdManager',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '主次干道',
+      authority: 'zcgdManager'
+    }, {
+      path: 'sysParaManager',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '系统参数',
+      authority: 'sysParaManager'
+    }, {
+      path: 'deptManager',
+      icon: 'category',
+      component: _import('admin/menu/index'),
+      name: '部门管理',
+      authority: 'deptManager'
+    }
+
+    ]
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* ,
+  {
+    path: '/authManager',
+    component: Layout,
+    name: '基础配置管理',
+    icon: 'setting',
+    authority: 'authManager',
+    children: [{
+      path: 'serviceManager',
+      component: _import('auth/service/index'),
+      name: '用户管理',
+      authority: 'serviceManager'
+    }]
+  },
+  {
+    path: '/monitorManager',
+    component: Layout,
+    name: '监控模块管理',
+    icon: 'setting',
+    authority: 'monitorManager',
+    children: [{
+      path: 'serviceEurekaManager',
+      component: _import('monitor/eureka/index'),
+      name: 'Eureka注册中心',
+      authority: 'serviceEurekaManager'
+    }, {
+      path: 'serviceMonitorManager',
+      component: _import('monitor/service/index'),
+      name: '服务状态监控',
+      authority: 'serviceMonitorManager'
+    }, {
+      path: 'serviceZipkinManager',
+      component: _import('monitor/zipkin/index'),
+      name: '服务状态监控',
+      authority: 'serviceZipkinManager'
+    }]
+  }*/];

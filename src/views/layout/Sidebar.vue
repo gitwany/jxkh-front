@@ -1,5 +1,9 @@
 <template>
-    <el-menu mode="vertical" theme="dark" unique-opened :default-active="$route.path" :collapse="isCollapse">
+    <el-menu mode="vertical"
+             background-color="#324057"
+             text-color="#fff"
+             active-text-color="#ffd04b"
+             :unique-opened="false" :default-active="$route.path" :collapse="isCollapse"  :default-openeds="openeds">
       <sidebar-item :routes='permissionMenus'></sidebar-item>
     </el-menu>
 </template>
@@ -17,6 +21,11 @@
       ]),
       isCollapse() {
         return !this.sidebar.opened
+      }
+    },
+    data () {
+      return {
+        openeds: ['taskManager','wtManager','pfManager','baseManager']
       }
     }
   }

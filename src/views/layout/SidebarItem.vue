@@ -1,6 +1,6 @@
 <template>
-	<div class='menu-wrapper'>
-	
+	<div class='menu-wrapper' style="height:100%;">
+
 	<template v-for="item in routes">
 		<!-- <router-link v-if="item.children.length>0" :to="item.code+'/'+item.children[0].code">
 			<el-menu-item :index="item.code+'/'+item.children[0].code" class='submenu-title-noDropdown'>
@@ -8,7 +8,7 @@
 				<span slot="title">{{item.children[0].title}}</span>
 			</el-menu-item>
 		</router-link> -->
-		<el-submenu :index="item.title">
+		<el-submenu :index="item.code">
 			<template slot="title">
 				<icon-svg v-if='item.icon' :icon-class="item.icon"></icon-svg>
 				<span>{{item.title}}</span>

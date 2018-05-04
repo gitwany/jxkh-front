@@ -99,9 +99,6 @@
           <img width="100%" :src="dialogImageUrl" alt="">
         </el-dialog>
         </el-form-item>
-        <el-form-item label="整改前照片" v-if="dialogStatus=='zg'||dialogStatus=='xz'">
-          <img width="50%" src="../../../../../static/img/test.jpg" alt="">
-        </el-form-item>
         <el-form-item label="整改后照片" v-if="dialogStatus=='zg'">
           <el-upload
             action="https://jsonplaceholder.typicode.com/posts/"
@@ -183,7 +180,7 @@
     getObj
   } from 'api/admin/issue/index'
   import Vue from 'vue'
-  import '../../../components/upload'
+  import '../../components/upload'
   export default {
     name: 'user',
     data() {

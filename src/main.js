@@ -5,8 +5,8 @@ import App from './App';
 import router from './router';
 import store from './store';
 import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-default/index.css';
-import 'assets/custom-theme/index.css'; // 换肤版本element-ui css
+import 'element-ui/lib/theme-chalk/index.css';
+//import 'assets/custom-theme/index.css'; // 换肤版本element-ui css
 import NProgress from 'nprogress'; // Progress 进度条
 import 'nprogress/nprogress.css';// Progress 进度条 样式
 import 'normalize.css/normalize.css';// normalize.css 样式格式化
@@ -20,7 +20,7 @@ import vueWaves from './directive/waves';// 水波纹指令
 import errLog from 'store/errLog';// error log组件
 import './mock/index.js';  // 该项目所有请求使用mockjs模拟
 import { getToken } from 'utils/auth';
-
+import 'font-awesome/css/font-awesome.min.css';
 // register globally
 Vue.component('multiselect', Multiselect);
 Vue.component('Sticky', Sticky);
